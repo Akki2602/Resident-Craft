@@ -48,7 +48,7 @@ void main() {
 
     float linearDepth = (2.0 * near) / (far + near - depth * (far - near));
 
-    float fog = smoothstep(0.15, 1., linearDepth);
+    float fog = smoothstep(0.15, 0.7, linearDepth);
 
     vec3 fogColor = vec3(0.0, 0.18, 0.22);
 
