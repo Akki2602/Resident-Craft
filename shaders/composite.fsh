@@ -48,7 +48,7 @@ void main() {
 
     float linearDepth = (2.0 * near) / (far + near - depth * (far - near));
 
-    float fog = smoothstep(0.15, 0.7, linearDepth);
+    float fog = smoothstep(0.15, 0.75, linearDepth);
 
     vec3 fogColor = vec3(0.0, 0.18, 0.22);
 
@@ -73,7 +73,8 @@ void main() {
     // =========================
     // GLOBAL DARKNESS
     // =========================
-    col *= 0.7;
+
+    col *= 0.8;
 
     // Detect sky
 float sky = step(0.999, depth);
@@ -113,6 +114,49 @@ col += vec3(0.8, 0.7, 0.5) * sun * sky * 0.08;
     float dist = distance(uv, vec2(0.5));
     float vignette = smoothstep(0.95, 0.3, dist);
     col *= vignette;
+
+    // =========================
+    // CORDYCEPS SPORES (SCREEN SPACE)
+    // =========================
+
+    vec3 spores = vec3(0.0);
+
+    // Density control
+    float density = 100.0;
+    float speed = 0.01;
+
+    // Loop (small for performance)
+    for (int i = 0; i < 16; i++) {
+        float fi = float(i);
+
+        // Random position pattern
+        float localSpeed = speed * (0.5 + fract(fi * 0.37));
+
+        vec2 pos = fract(vec2(
+            sin(fi * 12.989 + frameTimeCounter * localSpeed),
+            cos(fi * 78.233 + frameTimeCounter * localSpeed * 0.8)
+        ));
+
+        // Scale across screen
+        pos = fract(pos * density);
+
+        // Distance to current pixel
+        float d = distance(uv, pos);
+
+        // Small glowing particle
+        float particle = smoothstep(0.01, 0.0, d);
+
+        // Only visible in darker areas
+        float visibility = smoothstep(0.6, 0.2, lum);
+
+        spores += particle * visibility;
+        }
+
+    // Color (slightly warm fungal tone)
+    vec3 sporeColor = vec3(0.9, 0.85, 0.7);
+
+    // Apply subtly
+    col += spores * sporeColor * 0.08;
 
     // =========================
     // FILM GRAIN
